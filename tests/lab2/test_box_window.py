@@ -54,6 +54,14 @@ def box_2d_05():
     return BoxWindow(np.array([[0, 5], [-5, 5], [-1, 9]]))
 
 
+def test_len(box_2d_05):
+    assert len(box_2d_05) == 3
+
+
+def test_dimension(box_2d_05):
+    assert box_2d_05.dimension()
+
+
 @pytest.mark.parametrize(
     "point, expected",
     [
@@ -100,4 +108,4 @@ def test_unit_box(center, dimension, expected):
     [(np.array([[2.5, 3.14], [5, 10], [45, 100]]), np.array([2.82, 7.5, 72.5]))],
 )
 def test_center(bounds, expected):
-    assert np.array_equal(BoxWindow(bounds).center(), expected)
+    np.testing.assert_array_equal(BoxWindow(bounds).center(), expected)

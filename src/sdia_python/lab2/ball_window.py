@@ -4,15 +4,14 @@ from sdia_python.lab2.utils import get_random_number_generator
 
 
 class BallWindow:
-    """BallWindow is an object of N dimension. In 1D, it can be represented by a range, in 2D a circle and in 3D a ball
-    # ? and for dimension > 3
+    """BallWindow is an object of N dimension. In 1D, it can be represented by a range, in 2D a circle and in 3D a ball, for dimensions higher, it's hard to represent the ball.
     """
 
     def __init__(self, centre, radius):
         """This method initializes the ball, thanks to the center of the ball and its radius.
 
         Args:
-            centre (Liste): center of the ball  # ! list not List
+            centre (array): center of the ball
             radius (int): radius of the ball
         """
 
@@ -20,16 +19,10 @@ class BallWindow:
         self.centre = centre
 
     def __str__(self):
-        """display the center and the radius of the ball
-        # * with "display" one can expect a plot
+        """print the center and the radius of the ball
         """
-        # ! use a f-string
-        return (
-            "BallWindow with centre: "
-            + str(self.centre)
-            + " and radius: "
-            + str(self.radius)
-        )
+
+        return f"BallWindow with center: {self.centre[0]} and radius: {self.radius}"
 
     def __len__(self):
         """Returns the number of dimension of the ball"""
@@ -39,37 +32,30 @@ class BallWindow:
         """Returns true if a point is contained in the ball. The coordinates of the point are given in parameter.
 
         Args:
-            # ! point not args
-            # ? array or list
-            args (array): list of coordinates of the point
+            point (array): array of coordinates of the point
         """
-        # * exploit numpy vectors, avoid loops
-        dist = 0
-        for i in range(len(point)):
-            dist += (point[i] - self.centre[i]) ** 2
-        dist = np.sqrt(dist)
+        dist = (point - self.centre) ** 2
+        dist = np.sqrt(np.sum(dist))
         return dist <= self.radius
 
     def dimension(self):
-        """Returns the number of dimension of the ball"""
-        # ? what does "number of dimension" mean
+        """Returns the dimension of the ball"""
         return len(self)
 
     def volume(self):
-        """volume/area/length of the BallWindow
+        """volume/area/length of the BallWindow, we can't calculate for higher dimensions because we don't know the formula
+
 
         Returns:
             int: volume/area/length
         """
-        # ? why only for d <= 3, write a comment and mention it in docstring
+
         assert len(self) <= 3
-        # * since each if contains a return, replace elif/else by simple if
         if len(self) == 3:
             return (4 * np.pi * self.radius ** 3) / 3
-        elif len(self) == 2:
+        if len(self) == 2:
             return np.pi * self.radius ** 2
-        else:
-            return 2 * self.radius
+        return 2 * self.radius
 
     def indicator_function(self, point):
         """return the image of the point through the indicator function described by the ball window
@@ -77,27 +63,20 @@ class BallWindow:
         Args:
             args (array): points to test
         """
-        # Same remark as BoxWindow.indicator_function
-        return self.__contains__(point)
+        return point in self
 
     def rand_2d(self, n=1, seed=None):
-        """generate n random numbers in a 2d ball window
-        # ? random "numbers", no random points
+        """generate n random points in a 2d ball window
 
         Args:
             n (int): number of points to generate
             seed (int): describe the generator. Defaults to None.
         """
-        # ! rand_2d is not tested
-        # ! self.rayon is not defined
+
         rng = get_random_number_generator(seed)
-        L = []
-        # * exploit numpy vectorization power to avoid looping
-        for i in range(n):
-            rayon = rng.uniform(0, self.rayon)
-            teta = rng.uniform(0, 2 * np.pi)  # * theta or angle but not teta
-            # ? are you sure (x, y) is uniformly distributed over the disk
-            x = rayon * np.cos(teta) + self.center[0]
-            y = rayon * np.sin(teta) + self.center[1]
-            L.append([x, y])
-        return L
+        rad = np.sqrt(rng.uniform(0, self.radius ** 2, size=n))
+        theta = rng.uniform(0, 2 * np.pi, size=n)
+        Points = np.zeros((n, 2))
+        Points[:, 0] = rad * np.cos(theta)
+        Points[:, 1] = rad * np.sin(theta)
+        return Points

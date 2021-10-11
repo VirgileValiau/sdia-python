@@ -13,7 +13,7 @@ class BoxWindow:
             bounds (list): list of ranges of the box in all the directions of the space.
         """
         # * consider np.array(bounds) to exploit numpy vectorization power
-        self.bounds = bounds
+        self.bounds = np.array(bounds)
 
     def __str__(self):
         r"""BoxWindow: :math:`[a_1, b_1] \times [a_2, b_2] \times \cdots`
@@ -23,14 +23,13 @@ class BoxWindow:
         """
         S = "BoxWindow: "  # * convention/naming use lower case s or string
         # * consider for i, (a, b) in enumerate(self.bounds)
-        for i in range(len(self.bounds)):  # ! iterate over self.bounds
-            S += "[" + str(self.bounds[i][0]) + ", " + str(self.bounds[i][1]) + "]"
-            if i != len(self.bounds) - 1:
-                S += " x "
+        S += "[" + str(self.bounds[0][0]) + ", " + str(self.bounds[0][1]) + "]"
+        for b in self.bounds[1:]:
+            S += " x "
+            S += "[" + str(b[0]) + ", " + str(b[1]) + "]"
         return S
 
     def __len__(self):
-        # ! len/dimension is not tested
         """Returns the number of dimension of the box"""
         return len(self.bounds)
 
@@ -41,36 +40,27 @@ class BoxWindow:
             args (array): list of coordinates of the point
         """
         # * consider for (a, b), x in zip(self.bounds, point)
-        for i, x in enumerate(point):
-            print(self.bounds[i][0], x, self.bounds[i][1])
-            if not (self.bounds[i][0] <= x <= self.bounds[i][1]):
+        for (a, b), x in zip(self.bounds, point):
+            if not (a <= x <= b):
                 return False
         return True
 
     def dimension(self):
-        # ! len/dimension is not tested
-        """Returns the number of dimension of the box"""
-        # ? what does "number of dimension" mean
+        """Returns the dimension of the box"""
         return len(self)
 
     def volume(self):
         """Returns the volume of the box"""
-        # * exploit numpy vectors, use - or np.diff, and np.prod
-        res = 1
-        for i in range(len(self.bounds)):
-            longueur = np.sqrt((self.bounds[i][1] - self.bounds[i][0]) ** 2)
-            res = res * longueur
-        return res
+        Tmp = self.bounds[:, 1] - self.bounds[:, 0]
+        return np.prod(Tmp)
 
     def indicator_function(self, point):
         """return the image of the point through the indicator function described by the bow window
 
         Args:
-            args ([type]): [description]
+            args (Array): point we pass through the indicator function
         """
-        # ? how would you handle multiple points
-        # todo readability consider using "point in self"
-        return self.__contains__(point)
+        return point in self
 
     def rand(self, n=1, seed=None):
         """Generate ``n`` points uniformly at random inside the :py:class:`BoxWindow`.
@@ -79,38 +69,28 @@ class BoxWindow:
             n (int, optional): Number of points. Defaults to 1.
             rng ([type], optional): generator of a random number. Defaults to None.
         """
+
+        ## This function is tested with the Pi Approximation exercise in lab3.pynb
+
         rng = get_random_number_generator(seed)
-        # * exploit numpy, rng.uniform(a, b, size=n)
-        L = []  # * naming: use a more explicit name
-        for i in range(n):  # ! iterate over self.bounds
-            # * convention: use _ for unused counters
-            Point = []  # * convention: variables are lower cased
-            for j in range(self.dimension()):
-                Point.append(rng.uniform(self.bounds[j][0], self.bounds[j][1]))
-            L.append(Point)
-        return L
+        RandListe = []
+        for (a, b) in self.bounds:
+            point = rng.uniform(a, b, size=n)
+            RandListe.append(point)
+        return np.array(RandListe).T
 
     def center(self):
         """Returns the coordinates of the center of the box"""
-        # * exploit numpy vectors, use - or np.diff, and +
-        # * same remarks as in rand function
-        l = []
-        for i in range(len(self.bounds)):
-            l.append(round((self.bounds[i][0] + self.bounds[i][1]) / 2, 2))
-        print(l)
-        return np.array(l)
+        return np.round(0.5 * (self.bounds[:, 0] + self.bounds[:, 1]), 2)
 
 
 class UnitBoxWindow(BoxWindow):
-    def __init__(self, center, dimension):
-        """Create a Box window with bounds of length equal to 1
-        # ? what is the default UnitBoxWindow
-        # todo consider passing default arguments
-        # todo complete the docstring
+    def __init__(self, center=np.array([0, 0]), dimension=2):
+        """Generate a Unit Window with unit size lenght
 
         Args:
-            dimension (int): dimension de la boite
-            center (np.array): centre de la boite.
+            center (Array, optional): Define the center of the unit box. Defaults to np.array([0, 0]).
+            dimension (int, optional): Define the dimension of the unit box. Defaults to 2.
         """
         assert len(center) == dimension
         bounds = np.zeros((dimension, 2))
@@ -118,4 +98,6 @@ class UnitBoxWindow(BoxWindow):
             bounds[i] = [center[i] - 0.5, center[i] + 0.5]
 
         # ! use super(UnitBoxwindow, self).__init__(bounds)
+        # ! Doesn't work for us   :((((
+        # This works :
         BoxWindow.__init__(self, bounds)

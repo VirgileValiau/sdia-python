@@ -14,14 +14,23 @@ Happy reviewing.
 
 ## Your duo
 
-- name1-name2
-- link to repository
+- Rémy Descarpentries - Virgile Valiau
+- [link to repository](https://github.com/VirgileValiau/sdia-python)
 
 ### Code 0/5
 
-- Are the `BoxWindow`, `UnitBoxWindow`, `BallWindow`, `UnitBallWindow` defined?
+- Are the `BoxWindow`, `UnitBoxWindow`, `BallWindow` and  `UnitBallWindow` defined?
+
+  We defined the first three classes `BoxWindow`, `UnitBoxWindow`, `BallWindow`
+
 - Are the methods originally listed, now defined?
+
+  Yes, all the methods originally listed are defined.
+
 - Are there new methods defined? How are they used?
+
+  Yes, there is the new method `center()` that return the center of a BoxWindow
+
 - How readable is the code?
 - Are most of the operations "vectorized" using numpy? To which extent?
 - How original is the code?
